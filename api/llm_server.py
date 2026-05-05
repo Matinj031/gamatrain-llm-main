@@ -195,7 +195,11 @@ def fetch_documents():
 
 def build_index(documents: List[Document]):
     """Build or load RAG index."""
-    global query_engine, index_store
+    global query_engine, index_store, embed_model, llm
+
+    if embed_model is None:
+        logger.error("Embed model not initialized! Call setup_llm() first.")
+        raise RuntimeError("Embed model not initialized")
     
     # Custom QA prompt to reduce hallucination
     qa_prompt = PromptTemplate(
@@ -214,8 +218,14 @@ def build_index(documents: List[Document]):
     if os.path.exists(os.path.join(STORAGE_DIR, "docstore.json")):
         try:
             logger.info("Loading existing index from storage...")
-            storage_context = StorageContext.from_defaults(persist_dir=STORAGE_DIR)
-            index_store = load_index_from_storage(storage_context)
+            storage_context = StorageContext.from_defaults(
+                persist_dir=STORAGE_DIR,
+                embed_model=embed_model,
+            )
+            index_store = load_index_from_storage(
+                storage_context,
+                embed_model=embed_model,
+            )
             query_engine = index_store.as_query_engine(
                 similarity_top_k=3,
                 response_mode="compact",
