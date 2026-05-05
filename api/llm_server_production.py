@@ -62,6 +62,7 @@ HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8000"))
 STORAGE_DIR = os.getenv("STORAGE_DIR", "./storage")
 CUSTOM_DOCS_PATH = os.getenv("CUSTOM_DOCS_PATH", "../data/custom_docs.json")
+VERIFY_SSL = os.getenv("VERIFY_SSL", "true").strip().lower() not in {"0", "false", "no", "off"}
 
 # Gamatrain API for fetching documents
 API_BASE_URL = os.getenv("GAMATRAIN_API_URL", "https://api.gamaedtech.com/api/v1")
@@ -314,7 +315,7 @@ def fetch_documents():
     
     # Fetch blogs from API
     try:
-        with httpx.Client(verify=False, timeout=120) as client:
+        with httpx.Client(verify=VERIFY_SSL, timeout=120) as client:
             resp = client.get(
                 f"{API_BASE_URL}/blogs/posts",
                 params={"PagingDto.PageFilter.Size": 2000, "PagingDto.PageFilter.Skip": 0},
@@ -355,7 +356,7 @@ def fetch_documents():
         batch_size = 1000
         max_schools = 10000
         
-        with httpx.Client(verify=False, timeout=120) as client:
+        with httpx.Client(verify=VERIFY_SSL, timeout=120) as client:
             for skip in range(0, max_schools, batch_size):
                 resp = client.get(
                     f"{API_BASE_URL}/schools",
@@ -1076,37 +1077,6 @@ async def find_blog(title: str):
         "blogs_found": len(blog_results),
         "results": blog_results[:10]
     }
-
-
-@app.get("/v1/debug/list-blogs")
-async def list_blogs(search: str = ""):
-    """List all blog titles in the index."""
-    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"} if AUTH_TOKEN else {}
-    
-    try:
-        with httpx.Client(verify=False, timeout=120) as client:
-            resp = client.get(
-                f"{API_BASE_URL}/blogs/posts",
-                params={"PagingDto.PageFilter.Size": 2000, "PagingDto.PageFilter.Skip": 0},
-                headers=headers
-            )
-            if resp.status_code == 200:
-                blogs = resp.json().get("data", {}).get("list", [])
-                
-                # Filter by search term if provided
-                if search:
-                    blogs = [b for b in blogs if search.lower() in b.get("title", "").lower()]
-                
-                titles = [{"id": b.get("id"), "title": b.get("title")} for b in blogs[:100]]
-                
-                return {
-                    "total_blogs": len(resp.json().get("data", {}).get("list", [])),
-                    "filtered_count": len(titles),
-                    "search_term": search,
-                    "blogs": titles
-                }
-    except Exception as e:
-        return {"error": str(e)}
 
 
 @app.get("/v1/debug/list-blogs")

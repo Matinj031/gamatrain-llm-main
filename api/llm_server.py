@@ -41,6 +41,7 @@ HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8000"))
 STORAGE_DIR = os.getenv("STORAGE_DIR", "./storage")
 CUSTOM_DOCS_PATH = os.getenv("CUSTOM_DOCS_PATH", "../data/custom_docs.json")
+VERIFY_SSL = os.getenv("VERIFY_SSL", "true").strip().lower() not in {"0", "false", "no", "off"}
 
 # Gamatrain API
 API_BASE_URL = os.getenv("GAMATRAIN_API_URL", "https://api.gamaedtech.com/api/v1")
@@ -105,7 +106,7 @@ def fetch_documents():
     
     # Fetch ALL blogs with full content
     try:
-        with httpx.Client(verify=False, timeout=120) as client:
+        with httpx.Client(verify=VERIFY_SSL, timeout=120) as client:
             resp = client.get(
                 f"{API_BASE_URL}/blogs/posts",
                 params={
@@ -153,7 +154,7 @@ def fetch_documents():
     
     # Fetch schools (get more schools with detailed info)
     try:
-        with httpx.Client(verify=False, timeout=60) as client:
+        with httpx.Client(verify=VERIFY_SSL, timeout=60) as client:
             resp = client.get(
                 f"{API_BASE_URL}/schools",
                 params={"PagingDto.PageFilter.Size": 1000, "PagingDto.PageFilter.Skip": 0},
@@ -1390,77 +1391,6 @@ async def query_html(request: QueryRequest):
     except Exception as e:
         logger.error(f"HTML Query error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/v1/search/schools")
-async def search_schools(q: str, limit: int = 5):
-    """
-    Search for schools related to a query and return links.
-    Usage: /v1/search/schools?q=MIT&limit=5
-    """
-    if not q or len(q) < 2:
-        raise HTTPException(status_code=400, detail="Query too short")
-    
-    if not index_store:
-        raise HTTPException(status_code=503, detail="Index not ready")
-    
-    try:
-        # Search in RAG index
-        retriever = index_store.as_retriever(similarity_top_k=limit * 2)
-        nodes = retriever.retrieve(q)
-        
-        # Filter only schools
-        school_results = []
-        for node in nodes:
-            if node.metadata.get("type") == "school":
-                text = node.text
-                name = ""
-                slug = node.metadata.get("slug", "")
-                
-                if "School Name:" in text:
-                    name = text.split("School Name:")[1].split("\n")[0].strip()
-                
-                if slug and name:
-                    school_results.append({
-                        "name": name,
-                        "url": f"https://gamatrain.com/schools/{slug}",
-                        "slug": slug,
-                        "relevance_score": round(node.score, 3),
-                        "info": text[:200].replace("School Name:", "").strip()
-                    })
-                
-                if len(school_results) >= limit:
-                    break
-        
-        return {
-            "query": q,
-            "results_count": len(school_results),
-            "schools": school_results
-        }
-    except Exception as e:
-        logger.error(f"School search error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/v1/stream")
-async def stream_get(query: str, session_id: str = "default"):
-    """
-    Streaming endpoint (GET) - easier to test in browser.
-    Usage: /v1/stream?query=What is Gamatrain?
-    """
-    if not query:
-        raise HTTPException(status_code=400, detail="No query provided")
-    
-    logger.info(f"Stream query: {query[:50]}...")
-    
-    return StreamingResponse(
-        stream_query(query, session_id, use_rag=True),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-        }
-    )
 
 
 # =============================================================================
