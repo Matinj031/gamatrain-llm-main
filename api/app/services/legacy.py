@@ -1,7 +1,7 @@
 import importlib
 from typing import Any, Dict, Tuple
 
-from app.core.config import GROQ_MODEL, MAX_TOKENS, OLLAMA_MODEL, OPENROUTER_MODEL, PROVIDER
+from api.app.core.config import GROQ_MODEL, MAX_TOKENS, OLLAMA_MODEL, OPENROUTER_MODEL, PROVIDER
 
 
 def _legacy() -> Any:

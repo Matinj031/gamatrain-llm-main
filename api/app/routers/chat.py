@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
-from app.services import legacy
-from app.schemas.chat import ChatRequest, QueryRequest, RegenerateRequest
+from api.app.schemas.chat import ChatRequest, QueryRequest, RegenerateRequest
+from api.app.services import legacy
 
 router = APIRouter(prefix="/v1", tags=["chat"])
 

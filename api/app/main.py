@@ -4,10 +4,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import PROVIDER
-from app.routers.chat import router as chat_router
-from app.routers.health import router as health_router
-from app.services import legacy
+from api.app.core.config import PROVIDER
+from api.app.routers.chat import router as chat_router
+from api.app.routers.health import router as health_router
+from api.app.services import legacy
 
 logger = logging.getLogger("GamatrainAPI")
 

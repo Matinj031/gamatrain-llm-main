@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.core.config import PROVIDER
-from app.services import legacy
+from api.app.core.config import PROVIDER
+from api.app.services import legacy
 
 router = APIRouter(tags=["health"])
 
