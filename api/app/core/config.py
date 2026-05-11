@@ -1,6 +1,7 @@
 import os
 
 
+ENABLE_RAG = os.getenv("ENABLE_RAG", "true").strip().lower() not in {"0", "false", "no", "off"}
 PROVIDER = os.getenv("PROVIDER", "ollama")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gamatrain-qwen")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")

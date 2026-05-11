@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
-from api.app.schemas.chat import ChatRequest, QueryRequest, RegenerateRequest
-from api.app.services import legacy
+from ..schemas.chat import ChatRequest, QueryRequest, RegenerateRequest
+from ..services import legacy
 
 router = APIRouter(prefix="/v1", tags=["chat"])
 
@@ -11,6 +11,12 @@ router = APIRouter(prefix="/v1", tags=["chat"])
 async def query(request: QueryRequest):
     if not request.query:
         raise HTTPException(status_code=400, detail="No query provided")
+
+    if request.use_rag and not legacy.rag_ready():
+        raise HTTPException(
+            status_code=503,
+            detail="RAG is disabled or not initialized. Set ENABLE_RAG=true and restart, or call /v1/refresh.",
+        )
 
     if request.stream:
         return StreamingResponse(
@@ -31,6 +37,11 @@ async def chat_completions(request: ChatRequest):
         raise HTTPException(status_code=400, detail="No messages provided")
 
     last_message = request.messages[-1].content
+    if request.use_rag and not legacy.rag_ready():
+        raise HTTPException(
+            status_code=503,
+            detail="RAG is disabled or not initialized. Set ENABLE_RAG=true and restart, or call /v1/refresh.",
+        )
     if request.stream:
         return StreamingResponse(
             legacy.stream_query(last_message, request.session_id, request.use_rag),

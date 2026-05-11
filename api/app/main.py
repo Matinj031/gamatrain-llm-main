@@ -4,10 +4,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.app.core.config import PROVIDER
-from api.app.routers.chat import router as chat_router
-from api.app.routers.health import router as health_router
-from api.app.services import legacy
+from .core.config import ENABLE_RAG, PROVIDER
+from .routers.chat import router as chat_router
+from .routers.health import router as health_router
+from .services import legacy
 
 logger = logging.getLogger("GamatrainAPI")
 
@@ -16,7 +16,10 @@ logger = logging.getLogger("GamatrainAPI")
 async def lifespan(_app: FastAPI):
     logger.info("Starting Gamatrain AI Server (Modular App)...")
     logger.info("Using provider: %s", PROVIDER)
-    legacy.initialize()
+    if ENABLE_RAG:
+        legacy.initialize()
+    else:
+        logger.warning("ENABLE_RAG=false; skipping RAG initialization (no embedding downloads).")
     logger.info("Server ready!")
     yield
     logger.info("Shutting down...")
