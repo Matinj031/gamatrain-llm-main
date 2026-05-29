@@ -7,6 +7,7 @@ from ..core.config import (
     OPENROUTER_MODEL,
     PROVIDER,
 )
+from ..services import legacy
 
 router = APIRouter(tags=["health"])
 
@@ -35,6 +36,7 @@ async def health():
         "status": "healthy",
         "provider": PROVIDER,
         "model": _model_name(),
-        "rag_ready": False if not ENABLE_RAG else None,
+        "rag_enabled": ENABLE_RAG,
+        "rag_ready": legacy.rag_ready() if ENABLE_RAG else False,
     }
 
