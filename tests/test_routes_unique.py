@@ -1,3 +1,13 @@
+import os
+
+import pytest
+
+pytestmark = pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Monolith servers need full runtime deps; modular routes are covered in CI",
+)
+
+
 def _assert_unique_routes(app):
     # Ensure there are no duplicate (path, methods) combinations.
     seen = set()
