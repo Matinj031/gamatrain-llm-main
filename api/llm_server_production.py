@@ -36,7 +36,6 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from llama_index.core import VectorStoreIndex, Document, StorageContext, load_index_from_storage
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 
 
@@ -292,6 +291,8 @@ async def stream_ollama_api(prompt: str, max_tokens: int = 1024):
 def setup_embeddings():
     """Initialize embedding model (runs on CPU)."""
     global embed_model
+    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+
     logger.info("Setting up embedding model...")
     embed_model = HuggingFaceEmbedding(
         model_name="intfloat/multilingual-e5-large"

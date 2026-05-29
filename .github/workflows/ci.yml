@@ -30,8 +30,10 @@ jobs:
           PYTHONUTF8: "1"
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python -c "from api.llm_server import app as dev_app; print('dev routes', len(dev_app.routes))"
-          python -c "from api.llm_server_production import app as prod_app; print('prod routes', len(prod_app.routes))"
+          python -c "from api.llm_server import app as dev_app; print('dev routes', len(dev_app.routes))" \
+            || (echo "::error::Failed to import api.llm_server" && exit 1)
+          python -c "from api.llm_server_production import app as prod_app; print('prod routes', len(prod_app.routes))" \
+            || (echo "::error::Failed to import api.llm_server_production" && exit 1)
 
       - name: Run tests
         env:

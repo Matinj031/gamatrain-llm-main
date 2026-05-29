@@ -26,8 +26,6 @@ from pydantic import BaseModel
 
 from llama_index.core import VectorStoreIndex, Document, StorageContext, load_index_from_storage
 from llama_index.core.prompts import PromptTemplate
-from llama_index.llms.ollama import Ollama
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 # Global embedding model
 embed_model = None
@@ -69,7 +67,10 @@ def setup_llm():
     """Initialize LLM and embedding model."""
     global llm, embed_model
     logger.info(f"Setting up LLM: {MODEL_NAME}")
-    
+
+    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+    from llama_index.llms.ollama import Ollama
+
     llm = Ollama(model=MODEL_NAME, base_url=OLLAMA_BASE_URL, request_timeout=120.0)
     embed_model = HuggingFaceEmbedding(model_name="intfloat/multilingual-e5-large")
     
