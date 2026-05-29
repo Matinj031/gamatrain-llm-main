@@ -27,5 +27,6 @@ jobs:
       - name: Run tests
         env:
           ENABLE_RAG: "false"
-        run: pytest
+          PYTHONUTF8: "1"
+        run: pytest -v --tb=short
 
