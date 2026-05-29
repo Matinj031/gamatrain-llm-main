@@ -25,5 +25,7 @@ jobs:
           pip install -r api/requirements.txt -r requirements-dev.txt
 
       - name: Run tests
+        env:
+          ENABLE_RAG: "false"
         run: pytest
 
