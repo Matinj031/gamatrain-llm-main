@@ -423,7 +423,7 @@ User's follow-up question: {query_text}
 Continue explaining in detail:"""
             
             # Stream directly without RAG
-            async with httpx.AsyncClient(timeout=120.0, verify=False) as client:
+            async with httpx.AsyncClient(timeout=120.0, verify=VERIFY_SSL) as client:
                 async with client.stream(
                     "POST",
                     f"{OLLAMA_BASE_URL}/api/generate",
@@ -497,7 +497,7 @@ If the information above doesn't contain the answer, say so honestly."""
 {query_text}"""
                 
                 # Skip RAG retrieval, go directly to LLM
-                async with httpx.AsyncClient(timeout=120.0, verify=False) as client:
+                async with httpx.AsyncClient(timeout=120.0, verify=VERIFY_SSL) as client:
                     async with client.stream(
                         "POST",
                         f"{OLLAMA_BASE_URL}/api/generate",
@@ -591,7 +591,7 @@ Answer: """
             prompt = query_text
         
         # Stream from Ollama
-        async with httpx.AsyncClient(timeout=120.0, verify=False) as client:
+        async with httpx.AsyncClient(timeout=120.0, verify=VERIFY_SSL) as client:
             async with client.stream(
                 "POST",
                 f"{OLLAMA_BASE_URL}/api/generate",
