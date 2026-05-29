@@ -128,7 +128,7 @@ async def call_ollama_api(prompt: str, max_tokens: int = 1024):
     }
     
     try:
-        async with httpx.AsyncClient(timeout=120.0, verify=False) as client:
+        async with httpx.AsyncClient(timeout=120.0, verify=VERIFY_SSL) as client:
             response = await client.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json=payload
@@ -167,7 +167,7 @@ async def call_groq_api(prompt: str, max_tokens: int = 1024):
     }
     
     try:
-        async with httpx.AsyncClient(timeout=60.0, verify=False) as client:
+        async with httpx.AsyncClient(timeout=60.0, verify=VERIFY_SSL) as client:
             response = await client.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers=headers,
@@ -206,7 +206,7 @@ async def call_openrouter_api(prompt: str, max_tokens: int = 1024):
     }
     
     try:
-        async with httpx.AsyncClient(timeout=60.0, verify=False) as client:
+        async with httpx.AsyncClient(timeout=60.0, verify=VERIFY_SSL) as client:
             response = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
@@ -266,7 +266,7 @@ async def stream_ollama_api(prompt: str, max_tokens: int = 1024):
     }
     
     try:
-        async with httpx.AsyncClient(timeout=120.0, verify=False) as client:
+        async with httpx.AsyncClient(timeout=120.0, verify=VERIFY_SSL) as client:
             async with client.stream(
                 "POST",
                 f"{OLLAMA_BASE_URL}/api/generate",
@@ -329,7 +329,7 @@ def fetch_documents():
     
     # Fetch blogs from API
     try:
-        with httpx.Client(timeout=120, verify=False) as client:
+        with httpx.Client(timeout=120, verify=VERIFY_SSL) as client:
             resp = client.get(
                 f"{API_BASE_URL}/blogs/posts",
                 params={"PagingDto.PageFilter.Size": 2000, "PagingDto.PageFilter.Skip": 0},
@@ -370,7 +370,7 @@ def fetch_documents():
         batch_size = 1000
         max_schools = 10000
         
-        with httpx.Client(timeout=120, verify=False) as client:
+        with httpx.Client(timeout=120, verify=VERIFY_SSL) as client:
             for skip in range(0, max_schools, batch_size):
                 resp = client.get(
                     f"{API_BASE_URL}/schools",
@@ -1255,38 +1255,7 @@ async def list_blogs(search: str = ""):
     headers = {"Authorization": f"Bearer {AUTH_TOKEN}"} if AUTH_TOKEN else {}
     
     try:
-        with httpx.Client(timeout=120, verify=False) as client:
-            resp = client.get(
-                f"{API_BASE_URL}/blogs/posts",
-                params={"PagingDto.PageFilter.Size": 2000, "PagingDto.PageFilter.Skip": 0},
-                headers=headers
-            )
-            if resp.status_code == 200:
-                blogs = resp.json().get("data", {}).get("list", [])
-                
-                # Filter by search term if provided
-                if search:
-                    blogs = [b for b in blogs if search.lower() in b.get("title", "").lower()]
-                
-                titles = [{"id": b.get("id"), "title": b.get("title")} for b in blogs[:100]]
-                
-                return {
-                    "total_blogs": len(resp.json().get("data", {}).get("list", [])),
-                    "filtered_count": len(titles),
-                    "search_term": search,
-                    "blogs": titles
-                }
-    except Exception as e:
-        return {"error": str(e)}
-
-
-@app.get("/v1/debug/list-blogs")
-async def list_blogs(search: str = ""):
-    """List all blog titles in the index."""
-    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"} if AUTH_TOKEN else {}
-    
-    try:
-        with httpx.Client(timeout=120, verify=False) as client:
+        with httpx.Client(timeout=120, verify=VERIFY_SSL) as client:
             resp = client.get(
                 f"{API_BASE_URL}/blogs/posts",
                 params={"PagingDto.PageFilter.Size": 2000, "PagingDto.PageFilter.Skip": 0},
