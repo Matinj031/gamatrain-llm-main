@@ -24,9 +24,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r api/requirements.txt -r requirements-dev.txt
 
+      - name: Verify imports
+        env:
+          ENABLE_RAG: "false"
+          PYTHONUTF8: "1"
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -c "from api.llm_server import app as dev_app; print('dev routes', len(dev_app.routes))"
+          python -c "from api.llm_server_production import app as prod_app; print('prod routes', len(prod_app.routes))"
+
       - name: Run tests
         env:
           ENABLE_RAG: "false"
           PYTHONUTF8: "1"
-        run: pytest -v --tb=short
+          PYTHONPATH: ${{ github.workspace }}
+        run: pytest -v --tb=long
 
