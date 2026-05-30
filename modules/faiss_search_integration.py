@@ -109,7 +109,10 @@ def search_faiss(query: str, k: int = 5, min_score: float = 0.0) -> List[dict]:
         List of search results with school_id, text, and similarity_score
     """
     global faiss_index, faiss_metadata, faiss_embed_model
-    
+
+    if not FAISS_AVAILABLE:
+        raise HTTPException(status_code=503, detail="FAISS is not installed (faiss-cpu required)")
+
     if faiss_index is None or faiss_metadata is None or faiss_embed_model is None:
         raise HTTPException(
             status_code=503,
