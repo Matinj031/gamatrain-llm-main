@@ -1,7 +1,7 @@
 import importlib
 from typing import Any, Dict, Tuple
 
-from ..core.config import GROQ_MODEL, MAX_TOKENS, OLLAMA_MODEL, OPENROUTER_MODEL, PROVIDER
+from ..core.config import MAX_TOKENS, MODEL
 
 
 def _legacy() -> Any:
@@ -13,11 +13,7 @@ def _legacy() -> Any:
 
 
 def model_name() -> str:
-    if PROVIDER == "ollama":
-        return OLLAMA_MODEL
-    if PROVIDER == "groq":
-        return GROQ_MODEL
-    return OPENROUTER_MODEL
+    return MODEL
 
 
 def rag_ready() -> bool:
